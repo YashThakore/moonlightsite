@@ -11,7 +11,6 @@ export default function PricingPage() {
 
   return (
     <div style={{ padding: '50px', textAlign: 'center' }}>
-      <h1>Choose a Plan</h1>
       <stripe-pricing-table
         pricing-table-id="prctbl_1RQF1yGbPDlgmUqoCbDfjHVu"
         publishable-key="pk_live_51RQDtlGbPDlgmUqo1K9viTqQXApepgV2sscnKQRl4gzqzXp73geeTrTvzjrseCGUKsMhgYxclNVYNFUhxvKHONZQ00CjWWzWPX"
