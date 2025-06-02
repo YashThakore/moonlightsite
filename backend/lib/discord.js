@@ -1,0 +1,59 @@
+const { Client, GatewayIntentBits } = require("discord.js")
+
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+})
+
+let statsCache = {
+  serverCount: 0,
+  userCount: 0,
+  topGuilds: [],
+  lastUpdated: new Date(),
+}
+
+async function updateStats() {
+  try {
+    const guilds = await client.guilds.fetch()
+    const results = await Promise.all(
+      guilds.map(async (g) => {
+        const guild = await g.fetch()
+        return {
+          id: guild.id,
+          name: guild.name,
+          icon: guild.iconURL({ dynamic: true }),
+          memberCount: guild.memberCount || 0,
+        }
+      })
+    )
+
+    const sorted = results.sort((a, b) => b.memberCount - a.memberCount)
+
+    statsCache = {
+      serverCount: results.length,
+      userCount: results.reduce((acc, g) => acc + g.memberCount, 0),
+      topGuilds: sorted.slice(0, 50),
+      lastUpdated: new Date(),
+    }
+  } catch (err) {
+    console.error("Error updating stats:", err)
+  }
+}
+
+async function setupDiscordBot() {
+  client.once("ready", () => {
+    console.log(`✅ Logged in as ${client.user.tag}`)
+    updateStats()
+    setInterval(updateStats, 5000)
+  })
+
+  await client.login(process.env.DISCORD_TOKEN)
+}
+
+function getStats() {
+  return statsCache
+}
+
+module.exports = {
+  setupDiscordBot,
+  getStats,
+}
