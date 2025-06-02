@@ -1,9 +1,33 @@
-const { Client, GatewayIntentBits } = require("discord.js")
+const { Client, GatewayIntentBits, Partials } = require("discord.js")
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
-  fetchAllMembers: true,
-  shards: 'auto',
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.DirectMessageReactions,
+    GatewayIntentBits.GuildBans,
+    GatewayIntentBits.GuildEmojisAndStickers,
+    GatewayIntentBits.GuildIntegrations,
+    GatewayIntentBits.GuildWebhooks,
+    GatewayIntentBits.GuildInvites,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessageTyping,
+    GatewayIntentBits.DirectMessageTyping,
+  ],
+  partials: [
+    Partials.Channel,
+    Partials.Message,
+    Partials.Reaction,
+    Partials.GuildMember,
+  ],
+  allowedMentions: {
+    parse: ["users"],
+    repliedUser: false,
+  },
+  shards: "auto",
 })
 
 let statsCache = {
@@ -15,24 +39,32 @@ let statsCache = {
 
 async function updateStats() {
   try {
-    const guilds = await client.guilds.fetch()
+    const guilds = client.guilds.cache
+
     const results = await Promise.all(
       guilds.map(async (g) => {
-        const guild = await g.fetch()
-        return {
-          id: guild.id,
-          name: guild.name,
-          icon: guild.iconURL({ dynamic: true }),
-          memberCount: guild.memberCount || 0,
+        try {
+          const guild = await g.fetch()
+          return {
+            id: guild.id,
+            name: guild.name,
+            icon:
+              guild.iconURL({ dynamic: true }) ||
+              "https://cdn.discordapp.com/embed/avatars/0.png",
+            memberCount: guild.memberCount ?? 0,
+          }
+        } catch {
+          return null
         }
       })
     )
 
-    const sorted = results.sort((a, b) => b.memberCount - a.memberCount)
+    const validResults = results.filter((g) => g !== null)
+    const sorted = validResults.sort((a, b) => b.memberCount - a.memberCount)
 
     statsCache = {
-      serverCount: results.length,
-      userCount: results.reduce((acc, g) => acc + g.memberCount, 0),
+      serverCount: validResults.length,
+      userCount: validResults.reduce((acc, g) => acc + g.memberCount, 0),
       topGuilds: sorted.slice(0, 50),
       lastUpdated: new Date(),
     }
