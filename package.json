@@ -1,0 +1,7 @@
+{
+    "name": "placeholder",
+    "version": "1.0.0",
+    "description": "Dummy package to satisfy Heroku root detection",
+    "private": true
+  }
+  
