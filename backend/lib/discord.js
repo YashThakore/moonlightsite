@@ -37,26 +37,20 @@ let statsCache = {
     lastUpdated: new Date(),
 }
 
-async function updateStats() {
+function updateStats() {
     try {
-        const guilds = await client.guilds.fetch()
-        const results = await Promise.all(
-            guilds.map(async (g) => {
-                const guild = await g.fetch()
-                return {
-                    id: guild.id,
-                    name: guild.name,
-                    icon: guild.iconURL({ dynamic: true }),
-                    memberCount: guild.memberCount || 0,
-                }
-            })
-        )
+        const guilds = client.guilds.cache.map((g) => ({
+            id: g.id,
+            name: g.name,
+            icon: g.iconURL({ dynamic: true }) || null,
+            memberCount: g.memberCount ?? 0,
+        }))
 
-        const sorted = results.sort((a, b) => b.memberCount - a.memberCount)
+        const sorted = guilds.sort((a, b) => b.memberCount - a.memberCount)
 
         statsCache = {
-            serverCount: results.length,
-            userCount: results.reduce((acc, g) => acc + g.memberCount, 0),
+            serverCount: guilds.length,
+            userCount: guilds.reduce((acc, g) => acc + g.memberCount, 0),
             topGuilds: sorted.slice(0, 50),
             lastUpdated: new Date(),
         }
