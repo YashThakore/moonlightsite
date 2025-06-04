@@ -3,6 +3,7 @@ require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
 const statsRouter = require("./routes/stats")
+const authRouter = require("./routes/auth")
 const { setupDiscordBot } = require("./lib/discord")
 
 const app = express()
@@ -13,6 +14,8 @@ app.use(express.json())
 
 // Routes
 app.use("/api/stats", statsRouter)
+app.use("/api/auth", authRouter)
+
 
 // Start server and bot
 app.listen(PORT, async () => {
