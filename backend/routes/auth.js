@@ -50,12 +50,15 @@ router.get("/callback", async (req, res) => {
         console.log("Raw guilds:", guildsResponse.data);
 
 
-        const botGuildIds = client.guilds.cache.map(g => g.id);
+        const botGuildIds = new Set(client.guilds.cache.map(g => g.id));
 
-        const manageableGuilds = guildsResponse.data.filter(g => {
-            const hasAdminPerms = (parseInt(g.permissions) & 0x8) === 0x8; // ADMINISTRATOR = 0x8
-            return botGuildIds.includes(g.id) && (g.owner || hasAdminPerms);
-        });
+        const manageableGuilds = Array.isArray(guildsResponse.data)
+          ? guildsResponse.data.filter(g => {
+              const perms = parseInt(g.permissions)
+              const hasAccess = (perms & 0x20) === 0x20 || (perms & 0x8) === 0x8
+              return botGuildIds.has(g.id) && hasAccess
+            })
+          : []        
 
         res.json({
             user: userResponse.data,
