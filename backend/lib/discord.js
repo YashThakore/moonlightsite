@@ -86,6 +86,7 @@ function getStats() {
 }
 
 module.exports = {
+    client,
     setupDiscordBot,
     getStats,
 }
