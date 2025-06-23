@@ -11,6 +11,9 @@ const { setupDiscordBot } = require("./lib/discord")
 const app = express()
 const PORT = process.env.PORT || 3001
 
+//Stripe Payment Webhook
+app.use('/stripe', stripeWebhook);
+
 app.use(cors())
 app.use(express.json())
 
@@ -18,7 +21,6 @@ app.use(express.json())
 app.use("/api/stats", statsRouter)
 app.use("/api/auth", authRouter)
 app.use("/api/servers", serversRouter)
-app.use('/stripe', stripeWebhook);
 
 // Start server and bot
 app.listen(PORT, async () => {
