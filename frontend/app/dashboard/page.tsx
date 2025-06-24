@@ -47,27 +47,11 @@ export default function DashboardPage() {
     const storedGuilds = localStorage.getItem("moonlight_guilds")
     const storedOwnedGuilds = localStorage.getItem("moonlight_owned_guilds")
 
-    if (storedUser && storedGuilds) {
-      try {
-        setUser(JSON.parse(storedUser))
-        setGuilds(JSON.parse(storedGuilds))
-        if (storedOwnedGuilds) {
-          setOwnedGuildsWithoutBot(JSON.parse(storedOwnedGuilds))
-        }
-        setLoading(false)
-        return
-      } catch {
-        localStorage.removeItem("moonlight_user")
-        localStorage.removeItem("moonlight_guilds")
-        localStorage.removeItem("moonlight_owned_guilds")
-      }
-    }
-
     const code = typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("code")
       : null
 
-    if (code) {
+    const fetchData = () => {
       setAuthenticating(true)
       fetch(`https://api.moonlightbot.xyz/api/auth/callback?code=${code}`)
         .then((res) => res.json())
@@ -97,10 +81,44 @@ export default function DashboardPage() {
           setLoading(false)
           setAuthenticating(false)
         })
+    }
+
+    if (code) {
+      fetchData()
+    } else if (storedUser && storedGuilds) {
+      try {
+        setUser(JSON.parse(storedUser))
+        setGuilds(JSON.parse(storedGuilds))
+        if (storedOwnedGuilds) {
+          setOwnedGuildsWithoutBot(JSON.parse(storedOwnedGuilds))
+        }
+        // 🚀 Even if cached, refetch latest
+        fetch(`https://api.moonlightbot.xyz/api/auth/refresh?discordId=${JSON.parse(storedUser).id}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.user && Array.isArray(data.guilds)) {
+              localStorage.setItem("moonlight_user", JSON.stringify(data.user))
+              localStorage.setItem("moonlight_guilds", JSON.stringify(data.guilds))
+              localStorage.setItem("moonlight_owned_guilds", JSON.stringify(data.owned_guilds_without_bot || []))
+              setUser(data.user)
+              setGuilds(data.guilds)
+              setOwnedGuildsWithoutBot(data.owned_guilds_without_bot || [])
+            }
+          })
+          .catch((err) => {
+            console.error("Refresh error:", err)
+          })
+      } catch {
+        localStorage.removeItem("moonlight_user")
+        localStorage.removeItem("moonlight_guilds")
+        localStorage.removeItem("moonlight_owned_guilds")
+      }
+      setLoading(false)
     } else {
       setLoading(false)
     }
   }, [])
+
 
   const handleLogout = () => {
     localStorage.removeItem("moonlight_user")
