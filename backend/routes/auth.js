@@ -53,16 +53,23 @@ router.get("/callback", async (req, res) => {
         const botGuildIds = new Set(client.guilds.cache.map(g => g.id));
 
         const manageableGuilds = Array.isArray(guildsResponse.data)
-          ? guildsResponse.data.filter(g => {
-              const perms = parseInt(g.permissions)
-              const hasAccess = (perms & 0x20) === 0x20 || (perms & 0x8) === 0x8
-              return botGuildIds.has(g.id) && hasAccess
+            ? guildsResponse.data.filter(g => {
+                const perms = parseInt(g.permissions)
+                const hasAccess = (perms & 0x20) === 0x20 || (perms & 0x8) === 0x8
+                return botGuildIds.has(g.id) && hasAccess
             })
-          : []        
+            : [];
+
+        const ownedGuildsWithoutBot = Array.isArray(guildsResponse.data)
+            ? guildsResponse.data.filter(g => {
+                return g.owner && !botGuildIds.has(g.id)
+            })
+            : [];
 
         res.json({
             user: userResponse.data,
             guilds: manageableGuilds,
+            owned_guilds_without_bot: ownedGuildsWithoutBot,
         });
 
     } catch (err) {

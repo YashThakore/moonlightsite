@@ -12,10 +12,7 @@ import {
   ExternalLink,
   Loader2,
   LogOut,
-  Server,
   Settings,
-  Shield,
-  Users,
 } from "lucide-react"
 
 interface User {
@@ -41,22 +38,28 @@ export default function DashboardPage() {
   const [authenticating, setAuthenticating] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [guilds, setGuilds] = useState<Guild[]>([])
+  const [ownedGuildsWithoutBot, setOwnedGuildsWithoutBot] = useState<Guild[]>([])
 
   const router = useRouter()
 
   useEffect(() => {
     const storedUser = localStorage.getItem("moonlight_user")
     const storedGuilds = localStorage.getItem("moonlight_guilds")
+    const storedOwnedGuilds = localStorage.getItem("moonlight_owned_guilds")
 
     if (storedUser && storedGuilds) {
       try {
         setUser(JSON.parse(storedUser))
         setGuilds(JSON.parse(storedGuilds))
+        if (storedOwnedGuilds) {
+          setOwnedGuildsWithoutBot(JSON.parse(storedOwnedGuilds))
+        }
         setLoading(false)
         return
       } catch {
         localStorage.removeItem("moonlight_user")
         localStorage.removeItem("moonlight_guilds")
+        localStorage.removeItem("moonlight_owned_guilds")
       }
     }
 
@@ -72,8 +75,10 @@ export default function DashboardPage() {
           if (data.user && Array.isArray(data.guilds)) {
             localStorage.setItem("moonlight_user", JSON.stringify(data.user))
             localStorage.setItem("moonlight_guilds", JSON.stringify(data.guilds))
+            localStorage.setItem("moonlight_owned_guilds", JSON.stringify(data.owned_guilds_without_bot || []))
             setUser(data.user)
             setGuilds(data.guilds)
+            setOwnedGuildsWithoutBot(data.owned_guilds_without_bot || [])
             window.history.replaceState(null, "", "/dashboard")
           } else {
             throw new Error("Invalid user or guilds data")
@@ -83,8 +88,10 @@ export default function DashboardPage() {
           console.error("OAuth error:", err)
           localStorage.removeItem("moonlight_user")
           localStorage.removeItem("moonlight_guilds")
+          localStorage.removeItem("moonlight_owned_guilds")
           setUser(null)
           setGuilds([])
+          setOwnedGuildsWithoutBot([])
         })
         .finally(() => {
           setLoading(false)
@@ -98,8 +105,10 @@ export default function DashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem("moonlight_user")
     localStorage.removeItem("moonlight_guilds")
+    localStorage.removeItem("moonlight_owned_guilds")
     setUser(null)
     setGuilds([])
+    setOwnedGuildsWithoutBot([])
   }
 
   const handleLogin = () => {
@@ -149,7 +158,7 @@ export default function DashboardPage() {
 
   return (
     <PageLayout>
-<div className="pt-32 md:pt-40 px-4 md:px-10 pb-10">
+      <div className="pt-32 md:pt-40 px-4 md:px-10 pb-10">
         <h1 className="text-white text-3xl font-bold mb-4">
           Welcome, {user.global_name || user.username}
         </h1>
@@ -186,14 +195,14 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex items-center justify-between">
-<Button
-  size="sm"
-  className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF]"
-  onClick={() => router.push(`/dashboard/${guild.id}`)}
->
-  <Settings className="mr-2 h-4 w-4" />
-  Configure
-</Button>
+                  <Button
+                    size="sm"
+                    className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF]"
+                    onClick={() => router.push(`/dashboard/${guild.id}`)}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Configure
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -207,6 +216,46 @@ export default function DashboardPage() {
             </Card>
           ))}
         </div>
+
+        {ownedGuildsWithoutBot.length > 0 && (
+          <>
+            <h2 className="text-white text-xl font-bold mt-10 mb-4">Your servers without Moonlight</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ownedGuildsWithoutBot.map((guild) => (
+                <Card key={guild.id} className="bg-gray-900/50 border border-gray-800 hover:border-[#FDFBD4]/50 transition-all duration-300">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={getGuildIconUrl(guild)}
+                        alt={guild.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-white text-lg truncate">{guild.name}</CardTitle>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge variant="secondary" className="bg-[#FDFBD4]/20 text-[#FDFBD4] text-xs">
+                            <Crown className="h-3 w-3 mr-1" />
+                            Owner
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Button
+                      size="sm"
+                      className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF] w-full"
+                      onClick={() => window.open(`https://discord.com/oauth2/authorize?client_id=809245562615758898&scope=bot%20applications.commands&permissions=8&guild_id=${guild.id}&redirect_uri=https://moonlightbot.xyz/dashboard&response_type=code`, "_blank")}
+                    >
+                      Add Moonlight
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
+
       </div>
     </PageLayout>
   )
