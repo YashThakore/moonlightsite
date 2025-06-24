@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const Whitelist = require("../models/whitelist");
 const { client } = require("../lib/discord");
 const { EmbedBuilder } = require("discord.js");
+const dbConnect = require("../lib/db");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const ADMIN_ID = "969716767242977300"; // Replace with your Discord user ID
@@ -13,6 +14,7 @@ const ADMIN_ID = "969716767242977300"; // Replace with your Discord user ID
 router.use(bodyParser.raw({ type: "application/json" }));
 
 router.post("/webhook", async (req, res) => {
+  await dbConnect();
   const sig = req.headers["stripe-signature"];
   let event;
 

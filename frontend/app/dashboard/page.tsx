@@ -92,7 +92,6 @@ export default function DashboardPage() {
         if (storedOwnedGuilds) {
           setOwnedGuildsWithoutBot(JSON.parse(storedOwnedGuilds))
         }
-        // 🚀 Even if cached, refetch latest
         fetch(`https://api.moonlightbot.xyz/api/auth/refresh?discordId=${JSON.parse(storedUser).id}`)
           .then((res) => res.json())
           .then((data) => {
@@ -119,7 +118,6 @@ export default function DashboardPage() {
     }
   }, [])
 
-
   const handleLogout = () => {
     localStorage.removeItem("moonlight_user")
     localStorage.removeItem("moonlight_guilds")
@@ -144,7 +142,10 @@ export default function DashboardPage() {
     return (perms & 0x20) === 0x20 || (perms & 0x8) === 0x8
   }
 
-  const manageableGuilds = guilds.filter((g) => hasManagePermissions(g.permissions))
+  const combinedGuilds = [
+    ...guilds.map(g => ({ ...g, botInGuild: true })),
+    ...ownedGuildsWithoutBot.map(g => ({ ...g, botInGuild: false }))
+  ].sort((a, b) => a.name.localeCompare(b.name))
 
   if (loading || authenticating) {
     return (
@@ -181,7 +182,7 @@ export default function DashboardPage() {
           Welcome, {user.global_name || user.username}
         </h1>
         <p className="text-gray-400 mb-6">
-          You can manage {manageableGuilds.length} server{manageableGuilds.length !== 1 ? "s" : ""}.
+          You can manage or own {combinedGuilds.length} server{combinedGuilds.length !== 1 ? "s" : ""}.
         </p>
         <Button onClick={handleLogout} className="border border-gray-600 text-gray-300 mb-8">
           <LogOut className="mr-2" />
@@ -189,7 +190,7 @@ export default function DashboardPage() {
         </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {manageableGuilds.map((guild) => (
+          {combinedGuilds.map((guild) => (
             <Card key={guild.id} className="bg-gray-900/50 border border-gray-800 hover:border-[#FDFBD4]/50 transition-all duration-300">
               <CardHeader className="pb-3">
                 <div className="flex items-center space-x-3">
@@ -212,68 +213,38 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="flex items-center justify-between">
+                {guild.botInGuild ? (
+                  <div className="flex items-center justify-between">
+                    <Button
+                      size="sm"
+                      className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF]"
+                      onClick={() => router.push(`/dashboard/${guild.id}`)}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Configure
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-gray-400 hover:text-white"
+                      onClick={() => window.open(`https://discord.com/channels/${guild.id}`, "_blank")}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
                   <Button
                     size="sm"
-                    className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF]"
-                    onClick={() => router.push(`/dashboard/${guild.id}`)}
+                    className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF] w-full"
+                    onClick={() => window.open(`https://discord.com/oauth2/authorize?client_id=809245562615758898&scope=bot%20applications.commands&permissions=8&guild_id=${guild.id}&redirect_uri=https://moonlightbot.xyz/dashboard&response_type=code`, "_blank")}
                   >
-                    <Settings className="mr-2 h-4 w-4" />
-                    Configure
+                    Add Moonlight
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-gray-400 hover:text-white"
-                    onClick={() => window.open(`https://discord.com/channels/${guild.id}`, "_blank")}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
-
-        {ownedGuildsWithoutBot.length > 0 && (
-          <>
-            <h2 className="text-white text-xl font-bold mt-10 mb-4">Your servers without Moonlight</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ownedGuildsWithoutBot.map((guild) => (
-                <Card key={guild.id} className="bg-gray-900/50 border border-gray-800 hover:border-[#FDFBD4]/50 transition-all duration-300">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={getGuildIconUrl(guild)}
-                        alt={guild.name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-white text-lg truncate">{guild.name}</CardTitle>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="secondary" className="bg-[#FDFBD4]/20 text-[#FDFBD4] text-xs">
-                            <Crown className="h-3 w-3 mr-1" />
-                            Owner
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <Button
-                      size="sm"
-                      className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF] w-full"
-                      onClick={() => window.open(`https://discord.com/oauth2/authorize?client_id=809245562615758898&scope=bot%20applications.commands&permissions=8&guild_id=${guild.id}&redirect_uri=https://moonlightbot.xyz/dashboard&response_type=code`, "_blank")}
-                    >
-                      Add Moonlight
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </>
-        )}
-
       </div>
     </PageLayout>
   )
