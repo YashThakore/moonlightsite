@@ -3,6 +3,7 @@ const axios = require("axios");
 const router = express.Router();
 const { client } = require("../lib/discord");
 const User = require("../models/user");
+const dbConnect = require("../lib/db");
 
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
@@ -16,6 +17,7 @@ router.get("/login", (req, res) => {
 });
 
 router.get("/callback", async (req, res) => {
+    await dbConnect();
     const code = req.query.code;
     if (!code) return res.status(400).send("Missing code");
 
@@ -91,6 +93,7 @@ router.get("/callback", async (req, res) => {
 });
 
 router.get("/refresh", async (req, res) => {
+    await dbConnect();
     const discordId = req.query.discordId;
     if (!discordId) return res.status(400).send("Missing discordId");
 
