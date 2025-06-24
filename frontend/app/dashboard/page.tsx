@@ -1,3 +1,5 @@
+// full updated page.tsx:
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -200,7 +202,21 @@ export default function DashboardPage() {
                     className="w-12 h-12 rounded-full object-cover"
                   />
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-white text-lg truncate">{guild.name}</CardTitle>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-white text-lg truncate">
+                        {guild.name}
+                      </CardTitle>
+                      {guild.botInGuild && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-gray-400 hover:text-white"
+                          onClick={() => window.open(`https://discord.com/channels/${guild.id}`, "_blank")}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                     <div className="flex items-center space-x-2 mt-1">
                       {guild.owner && (
                         <Badge variant="secondary" className="bg-[#FDFBD4]/20 text-[#FDFBD4] text-xs">
@@ -213,34 +229,19 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                {guild.botInGuild ? (
-                  <div className="flex items-center justify-between">
-                    <Button
-                      size="sm"
-                      className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF]"
-                      onClick={() => router.push(`/dashboard/${guild.id}`)}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Configure
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-gray-400 hover:text-white"
-                      onClick={() => window.open(`https://discord.com/channels/${guild.id}`, "_blank")}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    size="sm"
-                    className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF] w-full"
-                    onClick={() => window.open(`https://discord.com/oauth2/authorize?client_id=809245562615758898&scope=bot%20applications.commands&permissions=8&guild_id=${guild.id}&redirect_uri=https://moonlightbot.xyz/dashboard&response_type=code`, "_blank")}
-                  >
-                    Add Moonlight
-                  </Button>
-                )}
+                <Button
+                  size="sm"
+                  className="bg-[#FDFBD4] text-[#030303] hover:bg-[#F2F0EF] w-full mt-2"
+                  onClick={() => {
+                    if (guild.botInGuild) {
+                      router.push(`/dashboard/${guild.id}`)
+                    } else {
+                      window.open(`https://discord.com/oauth2/authorize?client_id=809245562615758898&scope=bot%20applications.commands&permissions=8&guild_id=${guild.id}&redirect_uri=https://moonlightbot.xyz/dashboard&response_type=code`, "_blank")
+                    }
+                  }}
+                >
+                  {guild.botInGuild ? "Configure" : "Add Moonlight"}
+                </Button>
               </CardContent>
             </Card>
           ))}
