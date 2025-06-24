@@ -37,7 +37,7 @@ export function useLiveStats(): UseLiveStatsReturn {
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch("https://dolphin-app-2f7qd.ondigitalocean.app/api/stats", {
+      const response = await fetch("https://api.moonlightbot.xyz/api/stats", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
     if (code) {
       setAuthenticating(true)
-      fetch(`https://dolphin-app-2f7qd.ondigitalocean.app/api/auth/callback?code=${code}`)
+      fetch(`https://api.moonlightbot.xyz/api/auth/callback?code=${code}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.user && Array.isArray(data.guilds)) {
@@ -103,7 +103,7 @@ export default function DashboardPage() {
   }
 
   const handleLogin = () => {
-    window.location.href = "https://moonlight-backend-843daf202a22.herokuapp.com/api/auth/login"
+    window.location.href = "https://api.moonlightbot.xyz/api/auth/login"
   }
 
   const getGuildIconUrl = (guild: Guild) => {

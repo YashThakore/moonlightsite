@@ -20,7 +20,7 @@ export default function ServerManagePage() {
     async function fetchData() {
       setLoading(true)
       try {
-        const res = await fetch(`https://dolphin-app-2f7qd.ondigitalocean.app/api/servers/${guildId}`)
+        const res = await fetch(`https://api.moonlightbot.xyz/api/servers/${guildId}`)
         const data = await res.json()
 
         if (data.success) {
@@ -39,7 +39,7 @@ export default function ServerManagePage() {
   }, [guildId])
 
   const handleSave = async () => {
-    await fetch(`https://dolphin-app-2f7qd.ondigitalocean.app/api/servers/${guildId}`, {
+    await fetch(`https://api.moonlightbot.xyz/api/servers/${guildId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prefix, nickname }),
