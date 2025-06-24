@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion, useAnimation } from "framer-motion"
+import { motion, useTransform, animate, Variants } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -27,8 +27,8 @@ import {
 import { LiveStatsSection } from "@/components/live-stats-section"
 import { PageLayout } from "@/components/page-layout"
 
-// Framer Motion Variants
-const staggerContainer = {
+// Framer Motion Variants with explicit typing
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -38,19 +38,39 @@ const staggerContainer = {
   },
 }
 
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { y: 20, opacity: 0 },
-  show: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
+  show: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut", // This is now correctly typed
+    },
+  },
 }
 
+// Corrected Counter component
+function Counter({ from, to }: { from: number; to: number }) {
+  const [displayValue, setDisplayValue] = useState(from);
+
+  useEffect(() => {
+    const animation = animate(from, to, {
+      duration: 2,
+      onUpdate: (latest: number) => { // Explicitly type 'latest'
+        setDisplayValue(Math.round(latest));
+      },
+    });
+    return () => animation.stop();
+  }, [from, to]);
+
+  // Use a motion component to ensure it's recognized by Framer Motion's tree
+  return <motion.span>{displayValue.toLocaleString()}</motion.span>;
+}
+
+
 export default function MoonlightBot() {
-  const [stats, setStats] = useState({
-    servers: 0,
-    commands: 0,
-    users: 0,
-  })
   const [isRedirecting, setIsRedirecting] = useState(false)
-  const controls = useAnimation()
 
   const handleAddToDiscord = () => {
     setIsRedirecting(true)
@@ -63,32 +83,6 @@ export default function MoonlightBot() {
       setIsRedirecting(false)
     }, 600)
   }
-
-  // Animate stats with Framer Motion
-  useEffect(() => {
-    const targetStats = { servers: 1250, commands: 150, users: 50000 }
-
-    const animateStats = async () => {
-      await controls.start({
-        ...targetStats,
-        transition: { duration: 2, ease: "easeOut" },
-      })
-    }
-    
-    // Custom hook to update state from motion values
-    controls.on("change", (latest) => {
-        setStats({
-            servers: Math.floor(latest.servers),
-            commands: Math.floor(latest.commands),
-            users: Math.floor(latest.users),
-        })
-    })
-
-
-    const timer = setTimeout(animateStats, 500)
-    return () => clearTimeout(timer)
-  }, [controls])
-
 
   const features = [
     {
