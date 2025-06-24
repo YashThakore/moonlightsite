@@ -14,7 +14,7 @@ const { EmbedBuilder } = require("discord.js");
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 const ADMIN_ID = "969716767242977300";
 
 // Must go FIRST — Stripe webhook uses raw body
@@ -22,6 +22,7 @@ app.post(
   "/stripe/webhook",
   bodyParser.raw({ type: "application/json" }),
   async (req, res) => {
+    console.log("✅ Stripe webhook received!");
     const sig = req.headers["stripe-signature"];
     let event;
 

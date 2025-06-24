@@ -32,8 +32,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
                     text: {}
                 },
             ],
-            success_url: "https://your-website.com/success",
-            cancel_url: "https://your-website.com/cancel",
+            success_url: "https://www.moonlightbot.xyz",
+            cancel_url: "https://www.moonlightbot.xyz",
         });
 
         console.log("✅ Checkout URL:", session.url);
