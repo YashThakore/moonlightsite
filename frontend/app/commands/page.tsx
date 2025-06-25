@@ -53,7 +53,7 @@ export default function CommandsPage() {
                                     className="bg-gray-900/50 border border-gray-800 p-4 rounded-md hover:border-[#FDFBD4]/50 transition-all duration-300"
                                 >
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-white font-mono text-lg">/{cmd.name}</span>
+                                        <span className="text-white font-mono text-lg">{cmd.name}</span>
                                     </div>
                                     <p className="text-gray-400 text-sm">{cmd.description}</p>
                                     {cmd.usage && (
