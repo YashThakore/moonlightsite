@@ -12,6 +12,7 @@ export function Footer() {
               <span className="text-lg font-bold">Moonlight</span>
             </div>
             <p className="text-gray-400 text-sm">The ultimate Discord bot for your server</p>
+            <div className="text-gray-400 text-sm mb-4 md:mb-0">© 2025 Moonlight Discord Bot. All rights reserved.</div>
           </div>
 
           <div className="space-y-4">
@@ -63,18 +64,6 @@ export function Footer() {
                 DMCA
               </Link>
             </div>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="text-gray-400 text-sm mb-4 md:mb-0">© 2025 Moonlight Discord Bot. All rights reserved.</div>
-          <div className="flex space-x-4">
-            <a href="#" className="text-gray-400 hover:text-[#FDFBD4] transition-colors">
-              <Github className="h-5 w-5" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-[#FDFBD4] transition-colors">
-              <MessageSquare className="h-5 w-5" />
-            </a>
           </div>
         </div>
       </div>
