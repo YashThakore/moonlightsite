@@ -185,26 +185,26 @@ export default function ServerManagePage() {
           </TabsContent>
 
           <TabsContent value="plugins">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="bg-[#0F0F11] border border-gray-800 rounded-2xl shadow-xl hover:shadow-yellow-200/10 transition-shadow duration-300">
-                <CardHeader className="flex items-center gap-4">
-                  <div className="bg-blue-900/50 rounded-xl p-3">
-                    <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <div className="grid md:grid-cols-2 gap-4">
+              <Card className="bg-[#0F0F11] border border-gray-800 rounded-xl">
+                <CardHeader className="flex items-center gap-3 px-4 pt-4 pb-2">
+                  <div className="bg-blue-900/40 rounded-lg p-2">
+                    <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 12a3 3 0 003 3h1a3 3 0 000-6h-1a3 3 0 00-3 3z" />
                       <path d="M6 12a6 6 0 016-6h1a6 6 0 110 12h-1a6 6 0 01-6-6z" />
                     </svg>
                   </div>
                   <div>
-                    <CardTitle className="text-white text-xl font-semibold">Temporary Channels</CardTitle>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Allow members to instantly create temporary voice channels.
+                    <CardTitle className="text-white text-base font-semibold">Temporary Channels</CardTitle>
+                    <p className="text-xs text-gray-400">
+                      Let members instantly create temp voice channels.
                     </p>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-0 px-6 pb-6">
+                <CardContent className="px-4 pb-4 pt-0">
                   <Button
                     disabled={voicemasterStatus !== "idle"}
-                    className="mt-4 w-full bg-yellow-300 text-black hover:bg-yellow-400 font-semibold transition-colors duration-200 disabled:opacity-60"
+                    className="w-full h-8 text-sm bg-yellow-300 text-black hover:bg-yellow-400 font-medium transition disabled:opacity-60"
                     onClick={async () => {
                       const confirmed = confirm("Are you sure you want to set up Temporary Channels?");
                       if (!confirmed) return;
@@ -241,7 +241,7 @@ export default function ServerManagePage() {
                   >
                     {voicemasterStatus === "setting-up" ? (
                       <span className="flex items-center justify-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Setting up...
+                        <Loader2 className="h-3 w-3 animate-spin" /> Setting up...
                       </span>
                     ) : voicemasterStatus === "done" ? (
                       "✅ Setup Complete"
@@ -253,7 +253,6 @@ export default function ServerManagePage() {
               </Card>
             </div>
           </TabsContent>
-
 
 
           <TabsContent value="leveling">
