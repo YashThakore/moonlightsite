@@ -209,6 +209,11 @@ export default function ServerManagePage() {
                     <Button disabled className="w-full h-8 text-sm bg-green-600 text-white font-medium">
                       ✅ Setup Complete
                     </Button>
+                  ) : voicemasterStatus === "setting-up" ? (
+                    <Button disabled className="w-full h-8 text-sm bg-gray-700 text-white font-medium flex items-center justify-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Setting Up
+                    </Button>
                   ) : confirming ? (
                     <div className="flex gap-2">
                       <Button
@@ -272,6 +277,7 @@ export default function ServerManagePage() {
                       + Enable
                     </Button>
                   )}
+
 
                   {errorMsg && <p className="text-sm text-red-400 mt-2">{errorMsg}</p>}
                 </CardContent>

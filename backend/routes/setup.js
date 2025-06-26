@@ -1,37 +1,35 @@
 const express = require("express");
 const router = express.Router();
+const dbConnect = require("../lib/db"); // ✅ Keep this
 const Job = require("../models/jobs");
 const VoiceMaster = require("../models/voicemaster");
-const dbConnect = require("../lib/db");
 
-router.post("/api/setup/voicemaster", async (req, res) => {
-    await dbConnect();
+// POST /api/setup/voicemaster/:guildId
+router.post("/voicemaster/:guildId", async (req, res) => {
+  await dbConnect(); // ✅ Ensure DB connection
+  const { guildId } = req.params;
 
-    const { guildId } = req.body;
-
-    if (!guildId) return res.status(400).json({ success: false, error: "Missing guildId" });
-
-    // Prevent duplicates
-    const existing = await VoiceMaster.findOne({ guildId });
-    if (existing?.setupFinished) {
-        return res.json({ success: false, error: "Already set up" });
-    }
-
-    await Job.create({
-        name: "setup:voicemaster",
-        guildId,
-    });
-
+  try {
+    await Job.create({ name: "setup:voicemaster", guildId });
     res.json({ success: true });
+  } catch (err) {
+    console.error("[Setup API] Failed to create setup job:", err);
+    res.status(500).json({ success: false, error: "Failed to queue setup job" });
+  }
 });
 
-router.get("/api/setup/voicemaster/:guildId", async (req, res) => {
-    await dbConnect();
+// GET /api/setup/voicemaster/:guildId
+router.get("/voicemaster/:guildId", async (req, res) => {
+  await dbConnect(); // ✅ Ensure DB connection
+  const { guildId } = req.params;
 
-    const { guildId } = req.params;
-    const config = await VoiceMaster.findOne({ guildId });
-
-    res.json({ success: true, setupFinished: config?.setupFinished || false });
+  try {
+    const vm = await VoiceMaster.findOne({ guildId });
+    res.json({ setupFinished: vm?.setupComplete || false });
+  } catch (err) {
+    console.error("[Setup API] Failed to check setup status:", err);
+    res.status(500).json({ setupFinished: false });
+  }
 });
 
 module.exports = router;
