@@ -192,7 +192,7 @@ export default function ServerManagePage() {
                   <div className="flex items-center gap-3">
                     <AudioLines className="w-8 h-8 text-white" />
                     <div>
-                      <CardTitle className="text-white text-base">Temporary Channels</CardTitle>
+                      <CardTitle className="text-white text-base">Voicemaster</CardTitle>
                       <CardDescription className="text-white/60 text-sm">
                         Allow your members to create temporary voice channels in one click in your server
                       </CardDescription>
