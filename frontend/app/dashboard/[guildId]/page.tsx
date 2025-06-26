@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { PageLayout } from "@/components/page-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
+import { Loader2, AudioLines } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function ServerManagePage() {
@@ -15,7 +15,8 @@ export default function ServerManagePage() {
   const [prefix, setPrefix] = useState("")
   const [nickname, setNickname] = useState("")
   const [events, setEvents] = useState<any[]>([])
-
+  const [confirming, setConfirming] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
   const [voicemasterStatus, setVoicemasterStatus] = useState<"idle" | "setting-up" | "done">("idle");
 
   useEffect(() => {
@@ -185,74 +186,97 @@ export default function ServerManagePage() {
           </TabsContent>
 
           <TabsContent value="plugins">
-            <div className="grid md:grid-cols-2 gap-4">
-              <Card className="bg-[#0F0F11] border border-gray-800 rounded-xl">
-                <CardHeader className="flex items-center gap-3 px-4 pt-4 pb-2">
-                  <div className="bg-blue-900/40 rounded-lg p-2">
-                    <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9 12a3 3 0 003 3h1a3 3 0 000-6h-1a3 3 0 00-3 3z" />
-                      <path d="M6 12a6 6 0 016-6h1a6 6 0 110 12h-1a6 6 0 01-6-6z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <CardTitle className="text-white text-base font-semibold">Temporary Channels</CardTitle>
-                    <p className="text-xs text-gray-400">
-                      Let members instantly create temp voice channels.
-                    </p>
+            <div className="grid md:grid-cols-3 gap-6 pt-6">
+              <Card className="bg-[#111111] border border-white/10 rounded-xl">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <AudioLines className="w-8 h-8 text-white" />
+                    <div>
+                      <CardTitle className="text-white text-base">Temporary Channels</CardTitle>
+                      <CardDescription className="text-white/60 text-sm">
+                        Allow your members to create temporary voice channels in one click in your server
+                      </CardDescription>
+                    </div>
+                    <span className="ml-auto bg-yellow-500 text-black text-xs px-2 py-0.5 rounded-md font-semibold">
+                      Premium
+                    </span>
                   </div>
                 </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0">
-                  <Button
-                    disabled={voicemasterStatus !== "idle"}
-                    className="w-full h-8 text-sm bg-yellow-300 text-black hover:bg-yellow-400 font-medium transition disabled:opacity-60"
-                    onClick={async () => {
-                      const confirmed = confirm("Are you sure you want to set up Temporary Channels?");
-                      if (!confirmed) return;
+                <CardContent>
+                  {voicemasterStatus === "done" ? (
+                    <Button disabled className="w-full h-8 text-sm bg-green-600 text-white font-medium">
+                      ✅ Setup Complete
+                    </Button>
+                  ) : confirming ? (
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1 h-8 text-sm bg-green-500 text-white hover:bg-green-600 font-medium"
+                        onClick={async () => {
+                          setVoicemasterStatus("setting-up")
+                          setErrorMsg("")
 
-                      setVoicemasterStatus("setting-up");
+                          try {
+                            const res = await fetch(
+                              `https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`,
+                              {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ guildId }),
+                              }
+                            )
 
-                      try {
-                        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ guildId })
-                        });
-
-                        const data = await res.json();
-                        if (!data.success) {
-                          alert(data.error || "Failed to set up Voicemaster");
-                          setVoicemasterStatus("idle");
-                        } else {
-                          const interval = setInterval(async () => {
-                            const check = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`);
-                            const result = await check.json();
-                            if (result.setupFinished) {
-                              clearInterval(interval);
-                              setVoicemasterStatus("done");
+                            const data = await res.json()
+                            if (!data.success) {
+                              setErrorMsg(data.error || "Failed to set up Voicemaster")
+                              setVoicemasterStatus("idle")
+                              setConfirming(false)
+                              return
                             }
-                          }, 3000);
-                        }
-                      } catch (err) {
-                        alert("Error triggering setup");
-                        console.error(err);
-                        setVoicemasterStatus("idle");
-                      }
-                    }}
-                  >
-                    {voicemasterStatus === "setting-up" ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Loader2 className="h-3 w-3 animate-spin" /> Setting up...
-                      </span>
-                    ) : voicemasterStatus === "done" ? (
-                      "✅ Setup Complete"
-                    ) : (
-                      "+ Enable"
-                    )}
-                  </Button>
+
+                            const interval = setInterval(async () => {
+                              const check = await fetch(
+                                `https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`
+                              )
+                              const result = await check.json()
+                              if (result.setupFinished) {
+                                clearInterval(interval)
+                                setVoicemasterStatus("done")
+                                setConfirming(false)
+                              }
+                            }, 3000)
+                          } catch (err) {
+                            console.error(err)
+                            setErrorMsg("Error triggering setup")
+                            setVoicemasterStatus("idle")
+                            setConfirming(false)
+                          }
+                        }}
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        className="flex-1 h-8 text-sm bg-gray-700 text-white hover:bg-gray-600 font-medium"
+                        onClick={() => setConfirming(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      className="w-full h-8 text-sm bg-yellow-300 text-black hover:bg-yellow-400 font-medium"
+                      onClick={() => setConfirming(true)}
+                      disabled={voicemasterStatus !== "idle"}
+                    >
+                      + Enable
+                    </Button>
+                  )}
+
+                  {errorMsg && <p className="text-sm text-red-400 mt-2">{errorMsg}</p>}
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
+
 
 
           <TabsContent value="leveling">
