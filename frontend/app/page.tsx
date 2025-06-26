@@ -231,7 +231,7 @@ export default function MoonlightBot() {
           <div className="flex flex-col md:flex-row items-center justify-center gap-6">
             {/* Left: Text Content */}
             <motion.div className="text-left max-w-xl" variants={fadeInUp}>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#FDFBD4] bg-clip-text text-transparent leading-tight font-outfit">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#FDFBD4] bg-clip-text text-transparent leading-tight ">
                 Moonlight
               </h1>
               <p className="text-xl md:text-2xl mb-4 text-gray-300">Your All-in-One Discord Bot</p>
@@ -302,7 +302,7 @@ export default function MoonlightBot() {
       >
         <div className="container mx-auto">
           <motion.div className="text-center mb-16" variants={fadeInUp}>
-            <h2 className="text-4xl font-bold mb-4 font-outfit">Powerful Features</h2>
+            <h2 className="text-4xl font-bold mb-4">Powerful Features</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
               Everything you need to create an amazing Discord server experience
             </p>
@@ -345,7 +345,7 @@ export default function MoonlightBot() {
       >
         <div className="container mx-auto">
           <motion.div className="text-center mb-16" variants={fadeInUp}>
-            <h2 className="text-4xl font-bold mb-4 font-outfit">Command Showcase</h2>
+            <h2 className="text-4xl font-bold mb-4 ">Command Showcase</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">Explore our comprehensive command library</p>
           </motion.div>
 
@@ -409,7 +409,7 @@ export default function MoonlightBot() {
           <motion.div className="max-w-4xl mx-auto text-center" variants={fadeInUp}>
             <div className="bg-gradient-to-r from-[#FDFBD4]/10 to-yellow-500/10 rounded-2xl p-8 border border-[#FDFBD4]/20">
               <Crown className="h-16 w-16 text-[#FDFBD4] mx-auto mb-6" />
-              <h2 className="text-4xl font-bold mb-4 font-outfit">
+              <h2 className="text-4xl font-bold mb-4 ">
                 <span className="bg-gradient-to-r from-[#FDFBD4] to-yellow-400 bg-clip-text text-transparent">
                   Premium Features
                 </span>
@@ -532,7 +532,7 @@ export default function MoonlightBot() {
       >
         <div className="container mx-auto">
           <motion.div className="text-center mb-16" variants={fadeInUp}>
-            <h2 className="text-4xl font-bold mb-4 font-outfit">Frequently Asked Questions</h2>
+            <h2 className="text-4xl font-bold mb-4 ">Frequently Asked Questions</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">Get answers to common questions about Moonlight</p>
           </motion.div>
 

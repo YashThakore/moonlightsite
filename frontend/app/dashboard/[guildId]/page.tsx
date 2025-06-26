@@ -16,6 +16,20 @@ export default function ServerManagePage() {
   const [nickname, setNickname] = useState("")
   const [events, setEvents] = useState<any[]>([])
 
+  const [voicemasterStatus, setVoicemasterStatus] = useState<"idle" | "setting-up" | "done">("idle");
+
+  useEffect(() => {
+    async function fetchVMStatus() {
+      const res = await fetch(`/api/setup/voicemaster/${guildId}`);
+      const data = await res.json();
+      if (data.setupFinished) {
+        setVoicemasterStatus("done");
+      }
+    }
+    fetchVMStatus();
+  }, [guildId]);
+
+
   useEffect(() => {
     async function fetchData() {
       setLoading(true)
@@ -171,8 +185,81 @@ export default function ServerManagePage() {
           </TabsContent>
 
           <TabsContent value="plugins">
-            <p className="text-gray-300">Plugins settings coming soon.</p>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-yellow-400/50 rounded-2xl shadow-md">
+                <CardHeader className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-900/40 rounded-xl p-2">
+                      {/* Replace with your actual icon */}
+                      <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12a3 3 0 003 3h1a3 3 0 000-6h-1a3 3 0 00-3 3z" />
+                        <path d="M6 12a6 6 0 016-6h1a6 6 0 110 12h-1a6 6 0 01-6-6z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <CardTitle className="text-white text-xl font-bold">Temporary Channels</CardTitle>
+                      <p className="text-sm text-gray-400">Allow your members to create temporary voice channels in one click</p>
+                    </div>
+                  </div>
+                  <div className="bg-yellow-400 text-black text-xs font-semibold px-2 py-1 rounded-md">
+                    Premium
+                  </div>
+                </CardHeader>
+
+                <CardContent className="pt-0">
+                  <Button
+                    disabled={voicemasterStatus !== "idle"}
+                    className="mt-4 bg-white text-black hover:bg-gray-200 font-semibold disabled:opacity-60"
+                    onClick={async () => {
+                      const confirmed = confirm("Are you sure you want to set up Temporary Channels?");
+                      if (!confirmed) return;
+
+                      setVoicemasterStatus("setting-up");
+
+                      try {
+                        const res = await fetch(`/api/setup/voicemaster`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ guildId })
+                        });
+
+                        const data = await res.json();
+                        if (!data.success) {
+                          alert(data.error || "Failed to set up Voicemaster");
+                          setVoicemasterStatus("idle");
+                        } else {
+                          // Start polling to see when the bot finishes setup
+                          const interval = setInterval(async () => {
+                            const check = await fetch(`/api/setup/voicemaster/${guildId}`);
+                            const result = await check.json();
+                            if (result.setupFinished) {
+                              clearInterval(interval);
+                              setVoicemasterStatus("done");
+                            }
+                          }, 3000);
+                        }
+                      } catch (err) {
+                        alert("Error triggering setup");
+                        console.error(err);
+                        setVoicemasterStatus("idle");
+                      }
+                    }}
+                  >
+                    {voicemasterStatus === "setting-up" ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Setting up...
+                      </span>
+                    ) : voicemasterStatus === "done" ? (
+                      "✅ Setup Complete"
+                    ) : (
+                      "+ Enable"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
+
 
           <TabsContent value="leveling">
             <p className="text-gray-300">Leveling settings coming soon.</p>

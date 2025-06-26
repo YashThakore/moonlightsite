@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        outfit: ["Freeman", "sans-serif"],
+        cabin: ["Cabin", "sans-serif"],
         sans: ["Freeman", "ui-sans-serif", "system-ui"],
       },
       colors: {
