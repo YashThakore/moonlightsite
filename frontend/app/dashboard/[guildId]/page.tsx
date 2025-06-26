@@ -187,7 +187,7 @@ export default function ServerManagePage() {
 
           <TabsContent value="plugins">
             <div className="grid md:grid-cols-3 gap-6 pt-6">
-              <Card className="bg-[#111111] border border-white/10 rounded-xl">
+              <Card className="bg-gray-900/50 border border-gray-800 shadow-sm rounded-xl">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <AudioLines className="w-8 h-8 text-white" />
@@ -197,9 +197,11 @@ export default function ServerManagePage() {
                         Allow your members to create temporary voice channels in one click in your server
                       </CardDescription>
                     </div>
-                    <span className="ml-auto bg-yellow-500 text-black text-xs px-2 py-0.5 rounded-md font-semibold">
-                      Premium
-                    </span>
+                    {voicemasterStatus === "done" && (
+                      <span className="ml-auto bg-green-600 text-white text-xs px-2 py-0.5 rounded-md font-semibold">
+                        Setup Complete
+                      </span>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -263,7 +265,7 @@ export default function ServerManagePage() {
                     </div>
                   ) : (
                     <Button
-                      className="w-full h-8 text-sm bg-yellow-300 text-black hover:bg-yellow-400 font-medium"
+                      className="w-full h-8 text-sm bg-gray-800 text-white hover:bg-gray-700 font-medium"
                       onClick={() => setConfirming(true)}
                       disabled={voicemasterStatus !== "idle"}
                     >
@@ -276,6 +278,7 @@ export default function ServerManagePage() {
               </Card>
             </div>
           </TabsContent>
+
 
 
 
