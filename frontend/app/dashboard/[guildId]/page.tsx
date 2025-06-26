@@ -20,7 +20,7 @@ export default function ServerManagePage() {
 
   useEffect(() => {
     async function fetchVMStatus() {
-      const res = await fetch(`/api/setup/voicemaster/${guildId}`);
+      const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`);
       const data = await res.json();
       if (data.setupFinished) {
         setVoicemasterStatus("done");
@@ -212,7 +212,7 @@ export default function ServerManagePage() {
                       setVoicemasterStatus("setting-up");
 
                       try {
-                        const res = await fetch(`/api/setup/voicemaster`, {
+                        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`, {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ guildId })
@@ -224,7 +224,7 @@ export default function ServerManagePage() {
                           setVoicemasterStatus("idle");
                         } else {
                           const interval = setInterval(async () => {
-                            const check = await fetch(`/api/setup/voicemaster/${guildId}`);
+                            const check = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`);
                             const result = await check.json();
                             if (result.setupFinished) {
                               clearInterval(interval);

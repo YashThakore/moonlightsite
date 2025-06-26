@@ -5,6 +5,7 @@ const cors = require("cors");
 const statsRouter = require("./routes/stats");
 const authRouter = require("./routes/auth");
 const serversRouter = require("./routes/servers");
+const setupRouter = require("./routes/setup");
 const { setupDiscordBot, client } = require("./lib/discord");
 const Stripe = require("stripe");
 const bodyParser = require("body-parser");
@@ -92,6 +93,7 @@ app.use(express.json());
 app.use("/api/stats", statsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/servers", serversRouter);
+app.use("/api/setup", setupRouter);
 
 // Start server and bot
 app.listen(PORT, async () => {
