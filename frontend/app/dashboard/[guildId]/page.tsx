@@ -15,9 +15,11 @@ export default function ServerManagePage() {
   const [prefix, setPrefix] = useState("")
   const [nickname, setNickname] = useState("")
   const [events, setEvents] = useState<any[]>([])
-  const [confirming, setConfirming] = useState(false)
+  const [confirmingVM, setConfirmingVM] = useState(false);
+  const [confirmingCounter, setConfirmingCounter] = useState(false);
   const [errorMsg, setErrorMsg] = useState("")
   const [voicemasterStatus, setVoicemasterStatus] = useState<"idle" | "setting-up" | "done">("idle");
+  const [counterStatus, setCounterStatus] = useState<"idle" | "setting-up" | "done">("idle");
 
   useEffect(() => {
     async function fetchVMStatus() {
@@ -38,7 +40,7 @@ export default function ServerManagePage() {
         if (data.setupFinished) {
           clearInterval(interval);
           setVoicemasterStatus("done");
-          setConfirming(false);
+          setConfirmingVM(false);
         }
       }, 3000);
 
@@ -69,6 +71,33 @@ export default function ServerManagePage() {
     fetchData()
   }, [guildId])
 
+  useEffect(() => {
+    async function fetchCounterStatus() {
+      const res = await fetch(`https://api.moonlightbot.xyz/api/setup/counter/${guildId}`);
+      const data = await res.json();
+      if (data.setupFinished) {
+        setCounterStatus("done");
+      }
+    }
+    fetchCounterStatus();
+  }, [guildId]);
+
+  useEffect(() => {
+    if (counterStatus === "setting-up") {
+      const interval = setInterval(async () => {
+        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/counter/${guildId}`);
+        const data = await res.json();
+        if (data.setupFinished) {
+          clearInterval(interval);
+          setCounterStatus("done");
+          setConfirmingCounter(false);
+        }
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [counterStatus, guildId]);
+
+
   const handleSave = async () => {
     await fetch(`https://api.moonlightbot.xyz/api/servers/${guildId}`, {
       method: "POST",
@@ -78,7 +107,7 @@ export default function ServerManagePage() {
 
     alert("Settings saved!")
   }
-  
+
   const handleEnableVoicemaster = async () => {
     setVoicemasterStatus("setting-up")
     setErrorMsg("")
@@ -97,7 +126,7 @@ export default function ServerManagePage() {
       if (!data.success) {
         setErrorMsg(data.error || "Failed to set up Voicemaster")
         setVoicemasterStatus("idle")
-        setConfirming(false)
+        setConfirmingVM(false)
         return
       }
       // Polling is now handled exclusively by the useEffect hook
@@ -105,9 +134,37 @@ export default function ServerManagePage() {
       console.error(err)
       setErrorMsg("Error triggering setup")
       setVoicemasterStatus("idle")
-      setConfirming(false)
+      setConfirmingVM(false)
     }
   }
+
+  const handleEnableCounter = async () => {
+    setCounterStatus("setting-up");
+    setErrorMsg("");
+
+    try {
+      const res = await fetch(
+        `https://api.moonlightbot.xyz/api/setup/counter/${guildId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guildId }),
+        }
+      );
+
+      const data = await res.json();
+      if (!data.success) {
+        setErrorMsg(data.error || "Failed to set up Counter");
+        setCounterStatus("idle");
+        setConfirmingCounter(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Error triggering counter setup");
+      setCounterStatus("idle");
+      setConfirmingCounter(false);
+    }
+  };
 
 
   if (loading) {
@@ -256,7 +313,7 @@ export default function ServerManagePage() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Setting Up
                     </Button>
-                  ) : confirming ? (
+                  ) : confirmingVM ? (
                     <div className="flex gap-2">
                       <Button
                         className="flex-1 h-8 text-sm bg-green-500 text-white hover:bg-green-600 font-medium"
@@ -266,7 +323,7 @@ export default function ServerManagePage() {
                       </Button>
                       <Button
                         className="flex-1 h-8 text-sm bg-gray-700 text-white hover:bg-gray-600 font-medium"
-                        onClick={() => setConfirming(false)}
+                        onClick={() => setConfirmingVM(false)}
                       >
                         Cancel
                       </Button>
@@ -274,13 +331,63 @@ export default function ServerManagePage() {
                   ) : (
                     <Button
                       className="w-full h-8 text-sm bg-gray-800 text-white hover:bg-gray-700 font-medium"
-                      onClick={() => setConfirming(true)}
+                      onClick={() => setConfirmingVM(true)}
                       disabled={voicemasterStatus !== "idle"}
                     >
                       + Enable
                     </Button>
                   )}
 
+
+                  {errorMsg && <p className="text-sm text-red-400 mt-2">{errorMsg}</p>}
+                </CardContent>
+              </Card>
+              <Card className="bg-gray-900/50 border border-gray-800 shadow-sm rounded-xl">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <AudioLines className="w-8 h-8 text-white" />
+                    <div>
+                      <CardTitle className="text-white text-base">Server Counters</CardTitle>
+                      <CardDescription className="text-white/60 text-sm">
+                        Display live server stats like members, bots, and total users in voice channels.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {counterStatus === "done" ? (
+                    <Button disabled className="w-full h-8 text-sm bg-gray-600 text-white font-medium">
+                      Enabled
+                    </Button>
+                  ) : counterStatus === "setting-up" ? (
+                    <Button disabled className="w-full h-8 text-sm bg-gray-700 text-white font-medium flex items-center justify-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Setting Up
+                    </Button>
+                  ) : confirmingCounter  ? (
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1 h-8 text-sm bg-green-500 text-white hover:bg-green-600 font-medium"
+                        onClick={handleEnableCounter}
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        className="flex-1 h-8 text-sm bg-gray-700 text-white hover:bg-gray-600 font-medium"
+                        onClick={() => setConfirmingCounter(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      className="w-full h-8 text-sm bg-gray-800 text-white hover:bg-gray-700 font-medium"
+                      onClick={() => setConfirmingCounter(true)}
+                      disabled={counterStatus !== "idle"}
+                    >
+                      + Enable
+                    </Button>
+                  )}
 
                   {errorMsg && <p className="text-sm text-red-400 mt-2">{errorMsg}</p>}
                 </CardContent>
