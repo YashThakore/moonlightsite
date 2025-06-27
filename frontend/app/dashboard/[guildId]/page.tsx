@@ -30,6 +30,22 @@ export default function ServerManagePage() {
     fetchVMStatus();
   }, [guildId]);
 
+  useEffect(() => {
+    if (voicemasterStatus === "setting-up") {
+      const interval = setInterval(async () => {
+        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`);
+        const data = await res.json();
+        if (data.setupFinished) {
+          clearInterval(interval);
+          setVoicemasterStatus("done");
+          setConfirming(false);
+        }
+      }, 3000);
+
+      return () => clearInterval(interval);
+    }
+  }, [voicemasterStatus, guildId]);
+
 
   useEffect(() => {
     async function fetchData() {
