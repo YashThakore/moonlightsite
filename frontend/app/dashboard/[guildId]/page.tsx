@@ -6,7 +6,7 @@ import { PageLayout } from "@/components/page-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Loader2, AudioLines } from "lucide-react"
+import { Loader2, AudioLines, ChartBar } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function ServerManagePage() {
@@ -345,7 +345,7 @@ export default function ServerManagePage() {
               <Card className="bg-gray-900/50 border border-gray-800 shadow-sm rounded-xl">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
-                    <AudioLines className="w-8 h-8 text-white" />
+                    <ChartBar className="w-8 h-8 text-white" />
                     <div>
                       <CardTitle className="text-white text-base">Server Counters</CardTitle>
                       <CardDescription className="text-white/60 text-sm">
