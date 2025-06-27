@@ -244,17 +244,12 @@ export default function ServerManagePage() {
                         Allow your members to create temporary voice channels in one click in your server
                       </CardDescription>
                     </div>
-                    {voicemasterStatus === "done" && (
-                      <span className="ml-auto bg-green-600 text-white text-xs px-2 py-0.5 rounded-md font-semibold">
-                        Setup Complete
-                      </span>
-                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
                   {voicemasterStatus === "done" ? (
-                    <Button disabled className="w-full h-8 text-sm bg-green-600 text-white font-medium">
-                      ✅ Setup Complete
+                    <Button disabled className="w-full h-8 text-sm bg-gray-600 text-white font-medium">
+                      Enabled
                     </Button>
                   ) : voicemasterStatus === "setting-up" ? (
                     <Button disabled className="w-full h-8 text-sm bg-gray-700 text-white font-medium flex items-center justify-center gap-2">

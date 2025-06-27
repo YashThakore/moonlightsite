@@ -25,7 +25,7 @@ router.get("/voicemaster/:guildId", async (req, res) => {
 
   try {
     const vm = await VoiceMaster.findOne({ guildId });
-    res.json({ setupFinished: vm?.setupComplete || false });
+    res.json({ setupFinished: vm?.setupFinished || false });
   } catch (err) {
     console.error("[Setup API] Failed to check setup status:", err);
     res.status(500).json({ setupFinished: false });
