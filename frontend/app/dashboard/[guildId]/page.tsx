@@ -17,54 +17,35 @@ export default function ServerManagePage() {
   const [events, setEvents] = useState<any[]>([])
   const [confirming, setConfirming] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
-  const [voicemasterStatus, setVoicemasterStatus] = useState<"idle" | "setting-up" | "done">("idle")
-  const [activeTab, setActiveTab] = useState("usage")
+  const [voicemasterStatus, setVoicemasterStatus] = useState<"idle" | "setting-up" | "done">("idle");
 
   useEffect(() => {
-    const fetchInitialVMStatus = async () => {
-      try {
-        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`)
-        const data = await res.json()
-        if (data.setupFinished) {
-          setVoicemasterStatus("done")
-        }
-      } catch (err) {
-        console.error("Failed to fetch initial Voicemaster status:", err)
+    async function fetchVMStatus() {
+      const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`);
+      const data = await res.json();
+      if (data.setupFinished) {
+        setVoicemasterStatus("done");
       }
     }
-
-    fetchInitialVMStatus()
-  }, [guildId])
-
-  // Refetch Voicemaster setup status when visiting Plugins tab
-  useEffect(() => {
-    if (activeTab === "plugins") {
-      const fetchVMStatus = async () => {
-        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`)
-        const data = await res.json()
-        if (data.setupFinished) {
-          setVoicemasterStatus("done")
-        }
-      }
-      fetchVMStatus()
-    }
-  }, [activeTab, guildId])
+    fetchVMStatus();
+  }, [guildId]);
 
   useEffect(() => {
     if (voicemasterStatus === "setting-up") {
       const interval = setInterval(async () => {
-        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`)
-        const data = await res.json()
+        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`);
+        const data = await res.json();
         if (data.setupFinished) {
-          clearInterval(interval)
-          setVoicemasterStatus("done")
-          setConfirming(false)
+          clearInterval(interval);
+          setVoicemasterStatus("done");
+          setConfirming(false);
         }
-      }, 3000)
+      }, 3000);
 
-      return () => clearInterval(interval)
+      return () => clearInterval(interval);
     }
-  }, [voicemasterStatus, guildId])
+  }, [voicemasterStatus, guildId]);
+
 
   useEffect(() => {
     async function fetchData() {
@@ -97,6 +78,37 @@ export default function ServerManagePage() {
 
     alert("Settings saved!")
   }
+  
+  const handleEnableVoicemaster = async () => {
+    setVoicemasterStatus("setting-up")
+    setErrorMsg("")
+
+    try {
+      const res = await fetch(
+        `https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guildId }),
+        }
+      )
+
+      const data = await res.json()
+      if (!data.success) {
+        setErrorMsg(data.error || "Failed to set up Voicemaster")
+        setVoicemasterStatus("idle")
+        setConfirming(false)
+        return
+      }
+      // Polling is now handled exclusively by the useEffect hook
+    } catch (err) {
+      console.error(err)
+      setErrorMsg("Error triggering setup")
+      setVoicemasterStatus("idle")
+      setConfirming(false)
+    }
+  }
+
 
   if (loading) {
     return (
@@ -114,17 +126,44 @@ export default function ServerManagePage() {
       <div className="pt-32 md:pt-40 px-4 md:px-10 pb-10 space-y-6">
         <h1 className="text-white text-4xl font-extrabold mb-6">Manage Server</h1>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-8">
+        <Tabs defaultValue="usage" className="w-full space-y-8">
           <TabsList className="grid grid-cols-6 rounded-xl border border-gray-800 bg-gray-900/70 p-1">
-            {["usage", "emojis", "tools", "roles", "plugins", "leveling"].map((tab) => (
-              <TabsTrigger
-                key={tab}
-                value={tab}
-                className="data-[state=active]:bg-[#FDFBD4] data-[state=active]:text-black text-white font-semibold py-2 rounded-lg capitalize"
-              >
-                {tab}
-              </TabsTrigger>
-            ))}
+            <TabsTrigger
+              value="usage"
+              className="data-[state=active]:bg-[#FDFBD4] data-[state=active]:text-black text-white font-semibold py-2 rounded-lg"
+            >
+              Usage
+            </TabsTrigger>
+            <TabsTrigger
+              value="emojis"
+              className="data-[state=active]:bg-[#FDFBD4] data-[state=active]:text-black text-white font-semibold py-2 rounded-lg"
+            >
+              Emojis
+            </TabsTrigger>
+            <TabsTrigger
+              value="tools"
+              className="data-[state=active]:bg-[#FDFBD4] data-[state=active]:text-black text-white font-semibold py-2 rounded-lg"
+            >
+              Server Tools
+            </TabsTrigger>
+            <TabsTrigger
+              value="roles"
+              className="data-[state=active]:bg-[#FDFBD4] data-[state=active]:text-black text-white font-semibold py-2 rounded-lg"
+            >
+              Roles
+            </TabsTrigger>
+            <TabsTrigger
+              value="plugins"
+              className="data-[state=active]:bg-[#FDFBD4] data-[state=active]:text-black text-white font-semibold py-2 rounded-lg"
+            >
+              Plugins
+            </TabsTrigger>
+            <TabsTrigger
+              value="leveling"
+              className="data-[state=active]:bg-[#FDFBD4] data-[state=active]:text-black text-white font-semibold py-2 rounded-lg"
+            >
+              Leveling
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="usage" className="space-y-8">
@@ -180,6 +219,7 @@ export default function ServerManagePage() {
             </Card>
           </TabsContent>
 
+          {/* Placeholder content for other tabs */}
           <TabsContent value="emojis">
             <p className="text-gray-300">Emojis settings coming soon.</p>
           </TabsContent>
@@ -225,46 +265,7 @@ export default function ServerManagePage() {
                     <div className="flex gap-2">
                       <Button
                         className="flex-1 h-8 text-sm bg-green-500 text-white hover:bg-green-600 font-medium"
-                        onClick={async () => {
-                          setVoicemasterStatus("setting-up")
-                          setErrorMsg("")
-
-                          try {
-                            const res = await fetch(
-                              `https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`,
-                              {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ guildId }),
-                              }
-                            )
-
-                            const data = await res.json()
-                            if (!data.success) {
-                              setErrorMsg(data.error || "Failed to set up Voicemaster")
-                              setVoicemasterStatus("idle")
-                              setConfirming(false)
-                              return
-                            }
-
-                            const interval = setInterval(async () => {
-                              const check = await fetch(
-                                `https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`
-                              )
-                              const result = await check.json()
-                              if (result.setupFinished) {
-                                clearInterval(interval)
-                                setVoicemasterStatus("done")
-                                setConfirming(false)
-                              }
-                            }, 3000)
-                          } catch (err) {
-                            console.error(err)
-                            setErrorMsg("Error triggering setup")
-                            setVoicemasterStatus("idle")
-                            setConfirming(false)
-                          }
-                        }}
+                        onClick={handleEnableVoicemaster}
                       >
                         Confirm
                       </Button>
@@ -285,11 +286,15 @@ export default function ServerManagePage() {
                     </Button>
                   )}
 
+
                   {errorMsg && <p className="text-sm text-red-400 mt-2">{errorMsg}</p>}
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
+
+
+
 
           <TabsContent value="leveling">
             <p className="text-gray-300">Leveling settings coming soon.</p>
