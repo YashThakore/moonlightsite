@@ -20,6 +20,22 @@ export default function ServerManagePage() {
   const [voicemasterStatus, setVoicemasterStatus] = useState<"idle" | "setting-up" | "done">("idle")
   const [activeTab, setActiveTab] = useState("usage")
 
+  useEffect(() => {
+    const fetchInitialVMStatus = async () => {
+      try {
+        const res = await fetch(`https://api.moonlightbot.xyz/api/setup/voicemaster/${guildId}`)
+        const data = await res.json()
+        if (data.setupFinished) {
+          setVoicemasterStatus("done")
+        }
+      } catch (err) {
+        console.error("Failed to fetch initial Voicemaster status:", err)
+      }
+    }
+
+    fetchInitialVMStatus()
+  }, [guildId])
+
   // Refetch Voicemaster setup status when visiting Plugins tab
   useEffect(() => {
     if (activeTab === "plugins") {
