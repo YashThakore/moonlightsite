@@ -219,7 +219,9 @@ export default function MoonlightBot() {
 
 
   return (
+
     <PageLayout>
+      <div className="h-20 sm:h-24 md:h-28 lg:h-32" />
       {/* Hero Section */}
       <motion.section
         className="relative z-10 pt-32 pb-20 px-4"
@@ -490,9 +492,8 @@ export default function MoonlightBot() {
                     className="h-full"
                   >
                     <Card
-                      className={`bg-[#111111] border border-gray-800 rounded-2xl shadow-md text-left p-6 relative h-full flex flex-col ${
-                        plan.popular ? "ring-2 ring-[#FDFBD4]" : ""
-                      }`}
+                      className={`bg-[#111111] border border-gray-800 rounded-2xl shadow-md text-left p-6 relative h-full flex flex-col ${plan.popular ? "ring-2 ring-[#FDFBD4]" : ""
+                        }`}
                     >
                       {plan.popular && (
                         <div className="absolute -top-3 right-4 bg-[#FDFBD4] text-[#030303] text-xs px-3 py-1 rounded-full font-semibold shadow-md">

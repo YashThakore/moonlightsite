@@ -16,7 +16,7 @@ export function Header() {
               alt="Moonlight Logo"
               className="h-9 w-9 rounded-full object-cover"
             />
-            <span className="text-white text-xl font-semibold">moonlight</span>
+            <span className="text-white text-xl font-semibold">Moonlight</span>
           </Link>
 
           {/* Center: Navigation */}
@@ -35,8 +35,6 @@ export function Header() {
           </Link>
         </div>
       </header>
-
-      <div className="h-20 sm:h-24 md:h-28 lg:h-32" />
     </>
   )
 }
