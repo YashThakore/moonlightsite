@@ -349,7 +349,7 @@ export default function ServerManagePage() {
                     <div>
                       <CardTitle className="text-white text-base">Server Counters</CardTitle>
                       <CardDescription className="text-white/60 text-sm">
-                        Display live server stats like members, bots, and total users in voice channels.
+                        Display live server statistics like members, bots, and total users in voice channels.
                       </CardDescription>
                     </div>
                   </div>
