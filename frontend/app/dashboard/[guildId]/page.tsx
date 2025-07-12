@@ -344,7 +344,7 @@ export default function ServerManagePage() {
                 placeholder="Search emojis..."
                 value={emojiSearch}
                 onChange={(e) => setEmojiSearch(e.target.value)}
-                className="w-full max-w-md bg-gray-800 border-gray-700 text-white"
+                className="w-full max-w-7xl mx-auto bg-gray-800 border-gray-700 text-white"
               />
             </div>
 
