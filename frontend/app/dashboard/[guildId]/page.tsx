@@ -22,6 +22,7 @@ export default function ServerManagePage() {
   const [counterStatus, setCounterStatus] = useState<"idle" | "setting-up" | "done">("idle");
   const [emojis, setEmojis] = useState<any[]>([]);
   const [emojiSearch, setEmojiSearch] = useState("");
+  const [emojiLoading, setEmojiLoading] = useState(true);
   const token = typeof window !== "undefined" ? localStorage.getItem("moonlight_token") : null;
   const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined;
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,16 +67,20 @@ export default function ServerManagePage() {
 
   useEffect(() => {
     async function fetchEmojis() {
+      setEmojiLoading(true);
       try {
-        const res = await fetch("https://api.moonlightbot.xyz/api/emojis", {
-          headers,
-        });
+        const res = await fetch("https://api.moonlightbot.xyz/api/emojis", { headers });
         const data = await res.json();
         if (data.success) {
-          setEmojis(data.emojis);
+          const sorted = data.emojis.sort((a, b) =>
+            a.name.localeCompare(b.name)
+          );
+          setEmojis(sorted);
         }
       } catch (err) {
         console.error("Failed to fetch emojis:", err);
+      } finally {
+        setEmojiLoading(false);
       }
     }
 
@@ -343,27 +348,29 @@ export default function ServerManagePage() {
               />
             </div>
 
-            <div className="grid grid-cols-8 gap-4">
-              {paginatedEmojis.map((emoji) => (
-                <div
-                  key={emoji.id}
-                  className="flex flex-col items-center p-2 border border-gray-700 rounded-xl bg-gray-900/60"
-                >
-                  <img
-                    src={emoji.url}
-                    alt={emoji.name}
-                    className="w-10 h-10"
-                  />
-                  <p className="text-white text-xs mt-1">{emoji.name}</p>
-                  <Button
-                    onClick={() => handleAddEmoji(emoji)}
-                    className="text-xs mt-2 bg-[#FDFBD4] text-black hover:bg-[#f2f0ef]"
+            {emojiLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="w-8 h-8 animate-spin text-white" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-8 gap-4">
+                {paginatedEmojis.map((emoji) => (
+                  <div
+                    key={emoji.id}
+                    className="flex flex-col items-center p-2 border border-gray-700 rounded-xl bg-gray-900/60"
                   >
-                    + Add
-                  </Button>
-                </div>
-              ))}
-            </div>
+                    <img src={emoji.url} alt={emoji.name} className="w-10 h-10" />
+                    <p className="text-white text-xs mt-1">{emoji.name}</p>
+                    <Button
+                      onClick={() => handleAddEmoji(emoji)}
+                      className="text-xs mt-2 bg-[#FDFBD4] text-black hover:bg-[#f2f0ef]"
+                    >
+                      + Add
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="flex justify-center gap-2 mt-4">
               <Button
                 disabled={currentPage === 1}
