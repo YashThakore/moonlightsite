@@ -24,6 +24,8 @@ export default function ServerManagePage() {
   const [emojiSearch, setEmojiSearch] = useState("");
   const token = typeof window !== "undefined" ? localStorage.getItem("moonlight_token") : null;
   const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined;
+  const [currentPage, setCurrentPage] = useState(1);
+  const emojisPerPage = 100;
 
 
   useEffect(() => {
@@ -56,6 +58,11 @@ export default function ServerManagePage() {
   const filteredEmojis = emojis.filter((e) =>
     e.name.toLowerCase().includes(emojiSearch.toLowerCase())
   );
+  const indexOfLastEmoji = currentPage * emojisPerPage;
+  const indexOfFirstEmoji = indexOfLastEmoji - emojisPerPage;
+  const paginatedEmojis = filteredEmojis.slice(indexOfFirstEmoji, indexOfLastEmoji);
+  const totalPages = Math.ceil(filteredEmojis.length / emojisPerPage);
+
 
   useEffect(() => {
     async function fetchEmojis() {
@@ -66,7 +73,6 @@ export default function ServerManagePage() {
         const data = await res.json();
         if (data.success) {
           setEmojis(data.emojis);
-          setFiltered(data.emojis);
         }
       } catch (err) {
         console.error("Failed to fetch emojis:", err);
@@ -338,7 +344,7 @@ export default function ServerManagePage() {
             </div>
 
             <div className="grid grid-cols-8 gap-4">
-              {filteredEmojis.map((emoji) => (
+              {paginatedEmojis.map((emoji) => (
                 <div
                   key={emoji.id}
                   className="flex flex-col items-center p-2 border border-gray-700 rounded-xl bg-gray-900/60"
@@ -357,6 +363,25 @@ export default function ServerManagePage() {
                   </Button>
                 </div>
               ))}
+            </div>
+            <div className="flex justify-center gap-2 mt-4">
+              <Button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className="bg-gray-700 text-white hover:bg-gray-600"
+              >
+                Previous
+              </Button>
+              <span className="text-white text-sm flex items-center px-2">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                className="bg-gray-700 text-white hover:bg-gray-600"
+              >
+                Next
+              </Button>
             </div>
           </TabsContent>
 
