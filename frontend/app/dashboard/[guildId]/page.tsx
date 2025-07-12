@@ -20,6 +20,11 @@ export default function ServerManagePage() {
   const [errorMsg, setErrorMsg] = useState("")
   const [voicemasterStatus, setVoicemasterStatus] = useState<"idle" | "setting-up" | "done">("idle");
   const [counterStatus, setCounterStatus] = useState<"idle" | "setting-up" | "done">("idle");
+  const [emojis, setEmojis] = useState<any[]>([]);
+  const [emojiSearch, setEmojiSearch] = useState("");
+  const token = typeof window !== "undefined" ? localStorage.getItem("moonlight_token") : null;
+  const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined;
+
 
   useEffect(() => {
     async function fetchVMStatus() {
@@ -48,6 +53,50 @@ export default function ServerManagePage() {
     }
   }, [voicemasterStatus, guildId]);
 
+  const filteredEmojis = emojis.filter((e) =>
+    e.name.toLowerCase().includes(emojiSearch.toLowerCase())
+  );
+
+  useEffect(() => {
+    async function fetchEmojis() {
+      try {
+        const res = await fetch("https://api.moonlightbot.xyz/api/emojis", {
+          headers,
+        });
+        const data = await res.json();
+        if (data.success) {
+          setEmojis(data.emojis); // adapt this if your key is different
+        }
+      } catch (err) {
+        console.error("Failed to fetch emojis:", err);
+      }
+    }
+    fetchEmojis();
+  }, []);
+
+  const handleAddEmoji = async (emoji: any) => {
+    try {
+      const res = await fetch(
+        `https://api.moonlightbot.xyz/api/servers/${guildId}/emoji`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ emoji }),
+        }
+      );
+      const data = await res.json();
+      if (!data.success) {
+        alert("Failed to add emoji.");
+      } else {
+        alert("Emoji added!");
+      }
+    } catch (err) {
+      console.error("Add emoji error:", err);
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -276,9 +325,37 @@ export default function ServerManagePage() {
             </Card>
           </TabsContent>
 
-          {/* Placeholder content for other tabs */}
-          <TabsContent value="emojis">
-            <p className="text-gray-300">Emojis settings coming soon.</p>
+          <TabsContent value="emojis" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <Input
+                placeholder="Search emojis..."
+                value={emojiSearch}
+                onChange={(e) => setEmojiSearch(e.target.value)}
+                className="w-full max-w-md bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <div className="grid grid-cols-8 gap-4">
+              {filteredEmojis.map((emoji) => (
+                <div
+                  key={emoji.id}
+                  className="flex flex-col items-center p-2 border border-gray-700 rounded-xl bg-gray-900/60"
+                >
+                  <img
+                    src={emoji.url}
+                    alt={emoji.name}
+                    className="w-10 h-10"
+                  />
+                  <p className="text-white text-xs mt-1">{emoji.name}</p>
+                  <Button
+                    onClick={() => handleAddEmoji(emoji)}
+                    className="text-xs mt-2 bg-[#FDFBD4] text-black hover:bg-[#f2f0ef]"
+                  >
+                    + Add
+                  </Button>
+                </div>
+              ))}
+            </div>
           </TabsContent>
 
           <TabsContent value="tools">
@@ -364,7 +441,7 @@ export default function ServerManagePage() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Setting Up
                     </Button>
-                  ) : confirmingCounter  ? (
+                  ) : confirmingCounter ? (
                     <div className="flex gap-2">
                       <Button
                         className="flex-1 h-8 text-sm bg-green-500 text-white hover:bg-green-600 font-medium"

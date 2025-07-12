@@ -5,6 +5,7 @@ const cors = require("cors");
 const statsRouter = require("./routes/stats");
 const authRouter = require("./routes/auth");
 const serversRouter = require("./routes/servers");
+const emojiRouter = require("./routes/emojis");
 const setupRouter = require("./routes/setup");
 const { setupDiscordBot, client } = require("./lib/discord");
 const Stripe = require("stripe");
@@ -94,7 +95,7 @@ app.use("/api/stats", statsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/servers", serversRouter);
 app.use("/api/setup", setupRouter);
-
+app.use("/api/emojis", emojiRouter);
 // Start server and bot
 app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -206,4 +206,36 @@ router.post("/:guildId", async (req, res) => {
     }
 });
 
+router.post("/:guildId/emoji", authMiddleware, async (req, res) => {
+  const { guildId } = req.params;
+  const { emoji } = req.body;
+
+  if (!emoji?.url || !emoji?.name) {
+    return res.status(400).json({ success: false, error: "Missing emoji data." });
+  }
+
+  try {
+    const guild = await client.guilds.fetch(guildId);
+
+    if (!guild) return res.status(404).json({ success: false, error: "Guild not found." });
+
+    const addedEmoji = await guild.emojis.create({
+      name: emoji.name,
+      attachment: emoji.url,
+    });
+
+    return res.json({
+      success: true,
+      emoji: {
+        id: addedEmoji.id,
+        name: addedEmoji.name,
+        url: addedEmoji.url,
+      },
+    });
+  } catch (err) {
+    console.error("Emoji add error:", err);
+    res.status(500).json({ success: false, error: "Failed to add emoji." });
+  }
+});
+
 module.exports = router;
