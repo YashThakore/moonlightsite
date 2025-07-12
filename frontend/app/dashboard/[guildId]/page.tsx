@@ -65,12 +65,14 @@ export default function ServerManagePage() {
         });
         const data = await res.json();
         if (data.success) {
-          setEmojis(data.emojis); // adapt this if your key is different
+          setEmojis(data.emojis);
+          setFiltered(data.emojis);
         }
       } catch (err) {
         console.error("Failed to fetch emojis:", err);
       }
     }
+
     fetchEmojis();
   }, []);
 

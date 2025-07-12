@@ -1,31 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const authMiddleware = require("../lib/authMiddleware");
-const client = require("../lib/discord");
+const EmojiCache = require("../models/emojiCache");
+const dbConnect = require("../lib/db");
 
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const emojis = [];
-
-    for (const [guildId, guild] of client.guilds.cache) {
-      try {
-        const guildEmojis = await guild.emojis.fetch();
-
-        guildEmojis.forEach((emoji) => {
-          emojis.push({
-            id: emoji.id,
-            name: emoji.name,
-            animated: emoji.animated,
-            guild: guild.name,
-            url: `https://cdn.discordapp.com/emojis/${emoji.id}.${
-              emoji.animated ? "gif" : "webp"
-            }`,
-          });
-        });
-      } catch (e) {
-        console.warn(`Failed to fetch emojis for guild ${guildId}`);
-      }
-    }
+    await dbConnect();
+    const all = await EmojiCache.find(); // all guilds
+    const emojis = all.flatMap((doc) => doc.emojis);
 
     res.json({ success: true, emojis });
   } catch (err) {
