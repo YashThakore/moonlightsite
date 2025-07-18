@@ -8,7 +8,7 @@ interface PageLayoutProps {
 
 export function PageLayout({ children }: PageLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#030303] text-white relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-[#030303] text-white relative overflow-hidden">
       {/* Animated Star Field Background */}
       <div className="fixed inset-0 z-0">
         <div className="stars"></div>
@@ -16,7 +16,7 @@ export function PageLayout({ children }: PageLayoutProps) {
       </div>
 
       <Header />
-      <main className="relative z-10">{children}</main>
+      <main className="relative z-10 flex-grow">{children}</main>
       <Footer />
     </div>
   )
