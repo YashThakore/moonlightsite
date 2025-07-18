@@ -591,8 +591,8 @@ export default function ServerManagePage() {
                 </CardContent>
               </Card>
               {showIGModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                  <div className="bg-gray-900 rounded-xl p-6 w-full max-w-lg">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+                  <div className="bg-[#111827] p-6 rounded-lg shadow-xl w-full max-w-md mx-auto">
                     <h2 className="text-white text-xl font-semibold mb-4">Instagram Settings</h2>
 
                     <label className="block text-white mb-2">Channel to Post In</label>
