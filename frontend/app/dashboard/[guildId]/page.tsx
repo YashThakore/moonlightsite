@@ -591,36 +591,45 @@ export default function ServerManagePage() {
                 </CardContent>
               </Card>
               {showIGModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-                  <div className="bg-[#111827] p-6 rounded-lg shadow-xl w-full max-w-md mx-auto">
-                    <h2 className="text-white text-xl font-semibold mb-4">Instagram Settings</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+                  <div className="bg-[#111827] w-full max-w-md mx-auto p-6 rounded-xl shadow-2xl">
+                    <h2 className="text-white text-xl font-semibold mb-6">Instagram Settings</h2>
 
-                    <label className="block text-white mb-2">Channel to Post In</label>
-                    <select
-                      value={selectedChannel}
-                      onChange={(e) => setSelectedChannel(e.target.value)}
-                      className="w-full p-2 mb-4 rounded bg-gray-800 text-white"
-                    >
-                      {channels.map((ch) => (
-                        <option key={ch.id} value={ch.id}>
-                          #{ch.name}
-                        </option>
+                    {/* Channel Dropdown */}
+                    <div className="mb-5">
+                      <label className="block text-sm text-white mb-1">Channel to Post In</label>
+                      <select
+                        value={selectedChannel}
+                        onChange={(e) => setSelectedChannel(e.target.value)}
+                        size={4}
+                        className="w-full max-h-[160px] overflow-y-auto p-2 rounded bg-gray-800 text-white focus:outline-none"
+                      >
+                        {channels.map((ch) => (
+                          <option key={ch.id} value={ch.id}>
+                            #{ch.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Tracked Accounts */}
+                    <div className="mb-5">
+                      <label className="block text-sm text-white mb-2">
+                        Tracked Accounts ({igData?.usernames?.length || 0}/{isPremium ? 5 : 1})
+                      </label>
+                      {[...Array(isPremium ? 5 : 1)].map((_, i) => (
+                        <input
+                          id={`ig-user-${i}`}
+                          key={i}
+                          defaultValue={igData?.usernames?.[i]?.username || ""}
+                          placeholder={`Instagram Username ${i + 1}`}
+                          className="w-full p-2 mb-2 rounded bg-gray-800 text-white focus:outline-none"
+                        />
                       ))}
-                    </select>
+                    </div>
 
-
-                    <label className="block text-white mb-2">Tracked Accounts ({igData?.usernames?.length || 0}/{isPremium ? 5 : 1})</label>
-                    {[...Array(isPremium ? 5 : 1)].map((_, i) => (
-                      <input
-                        id={`ig-user-${i}`}
-                        key={i}
-                        defaultValue={igData?.usernames?.[i]?.username || ""}
-                        placeholder={`Instagram Username ${i + 1}`}
-                        className="w-full p-2 mb-2 rounded bg-gray-800 text-white"
-                      />
-                    ))}
-
-                    <div className="mt-4 flex justify-end gap-2">
+                    {/* Buttons */}
+                    <div className="flex justify-end gap-2">
                       <Button
                         onClick={() => setShowIGModal(false)}
                         className="bg-gray-700 text-white hover:bg-gray-600"
@@ -657,6 +666,7 @@ export default function ServerManagePage() {
                   </div>
                 </div>
               )}
+
 
 
             </div>
