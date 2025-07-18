@@ -9,6 +9,24 @@ import { Button } from "@/components/ui/button"
 import { Loader2, AudioLines, ChartBar } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
+interface Channel {
+  id: string;
+  name: string;
+}
+
+interface InstagramUser {
+  username: string;
+  customMessage?: string;
+  lastPostCode?: string;
+  lastStoryIds?: string[];
+}
+
+interface InstagramData {
+  guildId: string;
+  channelId: string;
+  usernames: InstagramUser[];
+}
+
 export default function ServerManagePage() {
   const { guildId } = useParams()
   const [loading, setLoading] = useState(true)
@@ -27,7 +45,55 @@ export default function ServerManagePage() {
   const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined;
   const [currentPage, setCurrentPage] = useState(1);
   const emojisPerPage = 100;
+  const [isPremium, setIsPremium] = useState(false);
+  const [showIGModal, setShowIGModal] = useState(false);
+  const [igData, setIgData] = useState<InstagramData | null>(null);
+  const [selectedChannel, setSelectedChannel] = useState(igData?.channelId || "");
+  const [channels, setChannels] = useState<Channel[]>([]);
 
+  useEffect(() => {
+    if (igData?.channelId) {
+      setSelectedChannel(igData.channelId);
+    }
+  }, [igData]);
+
+
+  useEffect(() => {
+    async function fetchChannels() {
+      try {
+        const res = await fetch(`https://api.moonlightbot.xyz/api/servers/channels/${guildId}`);
+        const data = await res.json();
+        if (data.success) {
+          setChannels(data.channels);
+        }
+      } catch (err) {
+        console.error("Failed to fetch channels:", err);
+      }
+    }
+
+    fetchChannels();
+  }, [guildId]);
+
+  useEffect(() => {
+    async function fetchIGInfo() {
+      try {
+        const [igRes, premiumRes] = await Promise.all([
+          fetch(`https://api.moonlightbot.xyz/api/instagram/${guildId}`),
+          fetch(`https://api.moonlightbot.xyz/api/premium/${guildId}`)
+        ]);
+
+        const igJson = await igRes.json();
+        const premiumJson = await premiumRes.json();
+
+        if (igJson.success) setIgData(igJson.data);
+        if (premiumJson.success) setIsPremium(premiumJson.data.isPremium);
+      } catch (err) {
+        console.error("Error fetching Instagram data:", err);
+      }
+    }
+
+    fetchIGInfo();
+  }, [guildId]);
 
   useEffect(() => {
     async function fetchVMStatus() {
@@ -503,6 +569,96 @@ export default function ServerManagePage() {
                   {errorMsg && <p className="text-sm text-red-400 mt-2">{errorMsg}</p>}
                 </CardContent>
               </Card>
+              <Card className="bg-gray-900/50 border border-gray-800 shadow-sm rounded-xl">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <img src="/ig.svg" className="w-8 h-8" alt="Instagram" />
+                    <div>
+                      <CardTitle className="text-white text-base">Instagram</CardTitle>
+                      <CardDescription className="text-white/60 text-sm">
+                        Auto-post new Instagram posts & stories from selected users to a channel.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    onClick={() => setShowIGModal(true)}
+                    className="w-full h-8 text-sm bg-[#FDFBD4] text-black hover:bg-[#f2f0ef] font-medium"
+                  >
+                    {igData ? "Edit Settings" : "+ Setup"}
+                  </Button>
+                </CardContent>
+              </Card>
+              {showIGModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="bg-gray-900 rounded-xl p-6 w-full max-w-lg">
+                    <h2 className="text-white text-xl font-semibold mb-4">Instagram Settings</h2>
+
+                    <label className="block text-white mb-2">Channel to Post In</label>
+                    <select
+                      value={selectedChannel}
+                      onChange={(e) => setSelectedChannel(e.target.value)}
+                      className="w-full p-2 mb-4 rounded bg-gray-800 text-white"
+                    >
+                      {channels.map((ch) => (
+                        <option key={ch.id} value={ch.id}>
+                          #{ch.name}
+                        </option>
+                      ))}
+                    </select>
+
+
+                    <label className="block text-white mb-2">Tracked Accounts ({igData?.usernames?.length || 0}/{isPremium ? 5 : 1})</label>
+                    {[...Array(isPremium ? 5 : 1)].map((_, i) => (
+                      <input
+                        id={`ig-user-${i}`}
+                        key={i}
+                        defaultValue={igData?.usernames?.[i]?.username || ""}
+                        placeholder={`Instagram Username ${i + 1}`}
+                        className="w-full p-2 mb-2 rounded bg-gray-800 text-white"
+                      />
+                    ))}
+
+                    <div className="mt-4 flex justify-end gap-2">
+                      <Button
+                        onClick={() => setShowIGModal(false)}
+                        className="bg-gray-700 text-white hover:bg-gray-600"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        className="bg-[#FDFBD4] text-black hover:bg-[#f2f0ef]"
+                        onClick={async () => {
+                          const usernames = [...Array(isPremium ? 5 : 1)].map((_, i) => {
+                            const input = document.getElementById(`ig-user-${i}`) as HTMLInputElement;
+                            return input?.value?.trim() || "";
+                          }).filter(Boolean).map(u => ({ username: u }));
+
+                          const res = await fetch(`https://api.moonlightbot.xyz/api/instagram/${guildId}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ channelId: selectedChannel, usernames })
+                          });
+
+                          const data = await res.json();
+                          if (data.success) {
+                            alert("Instagram settings saved.");
+                            setIgData(data.data);
+                            setShowIGModal(false);
+                          } else {
+                            alert("Failed to save settings.");
+                          }
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+
             </div>
           </TabsContent>
 
