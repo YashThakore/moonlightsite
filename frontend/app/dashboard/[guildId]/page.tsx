@@ -6,7 +6,7 @@ import { PageLayout } from "@/components/page-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Loader2, AudioLines, ChartBar } from "lucide-react"
+import { Loader2, AudioLines, ChartBar, Instagram } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 interface Channel {
@@ -572,7 +572,7 @@ export default function ServerManagePage() {
               <Card className="bg-gray-900/50 border border-gray-800 shadow-sm rounded-xl">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
-                    <img src="/ig.svg" className="w-8 h-8" alt="Instagram" />
+                    <Instagram className="w-8 h-8 text-white" />s
                     <div>
                       <CardTitle className="text-white text-base">Instagram</CardTitle>
                       <CardDescription className="text-white/60 text-sm">
@@ -584,9 +584,9 @@ export default function ServerManagePage() {
                 <CardContent>
                   <Button
                     onClick={() => setShowIGModal(true)}
-                    className="w-full h-8 text-sm bg-[#FDFBD4] text-black hover:bg-[#f2f0ef] font-medium"
+                    className="w-full h-8 text-sm bg-gray-800 text-white hover:bg-gray-700 font-medium"
                   >
-                    {igData ? "Edit Settings" : "+ Setup"}
+                    {igData ? "Edit Settings" : "+ Enable"}
                   </Button>
                 </CardContent>
               </Card>
